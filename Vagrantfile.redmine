@@ -1,0 +1,72 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = 2
+
+script = <<SCRIPT
+sudo apt-get update
+sudo apt-get upgrade -y
+
+sudo apt-get install -y git build-essential libssl-dev
+
+if [ ! -d "$HOME/.bashrc.d" ] ; then
+    mkdir $HOME/.bashrc.d
+fi
+
+if [ ! -d "$HOME/.bashrc.d" ] ; then
+    mkdir $HOME/.bashrc.d
+fi
+
+echo 'export PATH=$HOME/.rbenv/bin:$PATH' > $HOME/.bashrc.d/rbenv.sh
+echo 'eval "$(rbenv init -)"' >> $HOME/.bashrc.d/rbenv.sh
+echo 'source $HOME/.bashrc.d/rbenv.sh' >> .bashrc
+source $HOME/.bashrc.d/rbenv.sh
+
+if [ ! -d "$HOME/.rbenv/plugins/ruby-build" ] ; then
+    git clone https://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
+fi
+
+rbenv install 2.2.1
+rbenv rehash
+rbenv global 2.2.1
+rbenv rehash
+ruby -v
+
+gem install bundler
+
+# for sqlite3
+sudo apt-get install -y sqlite3 libsqlite3-dev
+
+# for rmagick gem
+sudo apt-get install -y imagemagick libmagickwand-dev
+
+wget http://www.redmine.org/releases/redmine-3.0.0.tar.gz
+tar xzf redmine-3.0.0.tar.gz
+cd redmine-3.0.0
+
+# config/database.yml
+echo 'production:' > config/database.yml
+echo '    adapter: sqlite3' >> config/database.yml
+echo '    database: db/redmine.sqlite3' >> config/database.yml
+
+RAILS_ENV=production bundle install --path vendor/bundle
+RAILS_ENV=production bundle exec rake db:migrate
+RAILS_ENV=production bundle exec rake generate_secret_token
+
+echo'execute "RAILS_ENV=production bundle exec rails s -b 0.0.0.0" to start redmine'
+
+SCRIPT
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "ubuntu/trusty64"
+
+  config.vm.network "forwarded_port", guest:3000, host:3001
+
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http = ENV['http_proxy']
+    config.proxy.https = ENV['https_proxy']
+    config.proxy.no_proxy = "localhost,127.0.0.1"
+  end
+  
+  config.vm.provision "shell", inline: script, privileged: false
+end
