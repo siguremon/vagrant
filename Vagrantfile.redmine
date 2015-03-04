@@ -13,18 +13,14 @@ if [ ! -d "$HOME/.bashrc.d" ] ; then
     mkdir $HOME/.bashrc.d
 fi
 
-if [ ! -d "$HOME/.bashrc.d" ] ; then
-    mkdir $HOME/.bashrc.d
-fi
+git clone https://github.com/sstephenson/rbenv.git $HOME/.rbenv
 
 echo 'export PATH=$HOME/.rbenv/bin:$PATH' > $HOME/.bashrc.d/rbenv.sh
 echo 'eval "$(rbenv init -)"' >> $HOME/.bashrc.d/rbenv.sh
 echo 'source $HOME/.bashrc.d/rbenv.sh' >> .bashrc
 source $HOME/.bashrc.d/rbenv.sh
 
-if [ ! -d "$HOME/.rbenv/plugins/ruby-build" ] ; then
-    git clone https://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
-fi
+git clone https://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
 
 rbenv install 2.2.1
 rbenv rehash
