@@ -11,8 +11,6 @@ SCRIPT
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
 
-  config.vm.network "forwarded_port", guest:3000, host:3001
-
   if Vagrant.has_plugin?("vagrant-proxyconf")
     config.proxy.http = ENV['http_proxy']
     config.proxy.https = ENV['https_proxy']
